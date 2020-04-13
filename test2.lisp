@@ -8,9 +8,12 @@
 = sym
   SYMBOL symbolPush
 
+= num
+  INTEGER integerPush
+
 = calculator
   ~rmSpaces
-  @sym '+' @sym
+  @num '+' @num
   emitSymbol1
   emitPlus
   emitSymbol2
@@ -27,17 +30,20 @@
 = sym
   SYMBOL symbolPush
 
+= num
+  INTEGER integerPush
+
 = calculator
   ~rmSpaces
   emitOpen
-  @sym
+  @num
   emitPlus
   emitSpace
-  emitSymbolTop
+  emitTop
   '+'
   emitSpace
-  @sym
-  emitSymbolTop
+  @num
+  emitTop
   emitClose
   symbolPop
   symbolPop
@@ -46,7 +52,7 @@
 
 (defparameter *test-dsl-code2*
   "
-a + b
+17 + 25
 ")
 
 
@@ -65,8 +71,9 @@ a + b
 (defmethod emitSpace ((self test-parser)) (emit-string self " "))
 (defmethod emitPlus ((self test-parser)) (emit-string self "+"))
 (defmethod symbolPush ((self test-parser)) (push (accepted-token self) (symbol-stack self)))
+(defmethod integerPush ((self test-parser)) (push (accepted-token self) (symbol-stack self)))
 (defmethod symbolPop ((self test-parser)) (pop (symbol-stack self)))
-(defmethod emitSymbolTop ((self test-parser)) (emit-string self "~a" (token-text (first (symbol-stack self)))))
+(defmethod emitTop ((self test-parser)) (emit-string self "~a" (token-text (first (symbol-stack self)))))
 ;; end mechanisms
   
 (defun test2 ()
