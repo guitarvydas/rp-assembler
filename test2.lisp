@@ -14,11 +14,11 @@
 = calculator
   ~rmSpaces
   @num '+' @num
-  emitSymbol1
+  emitAtom1
   emitPlus
-  emitSymbol2
-  symbolPop
-  symbolPop
+  emitAtom2
+  stackPop
+  stackPop
 
 ")
 
@@ -45,8 +45,8 @@
   @num
   emitTop
   emitClose
-  symbolPop
-  symbolPop
+  stackPop
+  stackPop
 
 ")
 
@@ -57,10 +57,10 @@
 
 
 (defclass test-parser (parser)
-  ((symbol-stack :accessor symbol-stack)))
+  ((atom-stack :accessor atom-stack)))
 
 (defmethod initially ((self test-parser) token-list)
-  (setf (symbol-stack self) nil)
+  (setf (atom-stack self) nil)
   (call-next-method))
 
 ;; test mechanisms
@@ -70,10 +70,12 @@
 (defmethod emitCloseBrace ((self test-parser)) (emit-string self "}"))
 (defmethod emitSpace ((self test-parser)) (emit-string self " "))
 (defmethod emitPlus ((self test-parser)) (emit-string self "+"))
-(defmethod symbolPush ((self test-parser)) (push (accepted-token self) (symbol-stack self)))
-(defmethod integerPush ((self test-parser)) (push (accepted-token self) (symbol-stack self)))
-(defmethod symbolPop ((self test-parser)) (pop (symbol-stack self)))
-(defmethod emitTop ((self test-parser)) (emit-string self "~a" (token-text (first (symbol-stack self)))))
+(defmethod symbolPush ((self test-parser)) (push (accepted-token self) (atom-stack self)))
+(defmethod integerPush ((self test-parser)) (push (accepted-token self) (atom-stack self)))
+(defmethod stackPop ((self test-parser)) (pop (atom-stack self)))
+(defmethod emitAtom1 ((self test-parser)) (emit-string self "~a" (token-text (second (atom-stack self)))))
+(defmethod emitAtom2 ((self test-parser)) (emit-string self "~a" (token-text (first (atom-stack self)))))
+(defmethod emitTop ((self test-parser)) (emit-string self "~a" (token-text (first (atom-stack self)))))
 ;; end mechanisms
   
 (defun test2 ()
