@@ -37,9 +37,7 @@
   ~rmSpaces
   emitOpen
   @num
-  emitPlus
-  emitSpace
-  emitTop
+  emitCurriedPlus
   '+'
   emitSpace
   @num
@@ -76,6 +74,7 @@
 (defmethod emitAtom1 ((self test-parser)) (emit-string self "~a" (token-text (second (atom-stack self)))))
 (defmethod emitAtom2 ((self test-parser)) (emit-string self "~a" (token-text (first (atom-stack self)))))
 (defmethod emitTop ((self test-parser)) (emit-string self "~a" (token-text (first (atom-stack self)))))
+(defmethod emitCurriedPlus ((self test-parser)) (emit-string self "(lambda(x)(+ ~a x))" (token-text (first (atom-stack self)))))
 ;; end mechanisms
   
 (defun test2 ()
