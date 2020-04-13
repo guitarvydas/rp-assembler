@@ -25,6 +25,7 @@
   :components ((:module "source"
                         :pathname "./"
                         :components ((:file "test")
-				     (:file "test2")))))
+				     (:file "test2")
+				     (:file "test3")))))
 
 

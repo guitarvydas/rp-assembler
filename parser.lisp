@@ -128,12 +128,11 @@
    (setf result rpa:+succeed+))
   result))
 
-(defmethod <parse-choice-statements> ((p parser))
-  (let ((result rpa:+fail+))
-  (@:loop
-   (@:exit-when (not (rpa:parser-success? (<parse-statement> p))))
-   (setf result rpa:+succeed+))
-  result))
+(defmethod <parse-choice-start> ((p parser))
+  (cond ((parser-success? (lookahead-char? p #\*)) (<parse-noop> p) +succeed+)
+	((parser-success? (lookahead-char? p #\&)) (<parse-predicate-call> p) +succeed+)
+	((parser-success? (lookahead-char? p #\?)) (<parse-lookahead> p) +succeed+)
+	(t +fail+)))
 
 (defmethod <parse-cycle> ((p parser))
   (cond ((rpa:parser-success? (rpa:lookahead-char? p #\{))
@@ -150,12 +149,14 @@
 	 (rpa:input-char p #\[)
              (rpa:emit-string p "~&(cond~%")
              (rpa:emit-string p "(")
-	 (<parse-choice-statements> p)
+	 (<parse-choice-start> p)
+	 (<parse-statements> p)
              (rpa:emit-string p ")~%")
          (@:loop
            (@:exit-when (not (rpa:parser-success? (rpa:lookahead-char? p #\|))))
            (rpa:input-char p #\|)
                (rpa:emit-string p "(")
+	   (<parse-choice-start> p)
            (<parse-statements> p)
                (rpa:emit-string p ")~%"))
 	 (rpa:input-char p #\])
@@ -175,16 +176,15 @@
 (defmethod <parse-input-token> ((p parser))
   (<parse-expr> p))
 
-(defmethod error-if-not-success ((p parser) value)
+(defmethod error-if-not-success ((p parser) msg value)
   (if (eq rpa:+succeed+ value)
       rpa:+succeed+
-      (rp-parse-error p "")))
+      (rp-parse-error p msg)))
 
 (defmethod <parse-lookahead> ((p parser))
   (cond ((rpa:parser-success? (rpa:lookahead-char? p #\?))
 	 (rpa:input-char p #\?)
-	 (error-if-not-success p (<parse-lookahead-expr> p))
-	 rpa:+succeed+)
+	 (<parse-lookahead-expr> p))
 	(t rpa:+fail+)))
   
 (defmethod <parse-rule-call> ((p parser))
@@ -213,7 +213,7 @@
 (defmethod <parse-cycle-exit> ((p parser))
   (cond ((rpa:parser-success? (rpa:lookahead-char? p #\>))
 	 (rpa:input-char p #\>)
-           (rpa:emit-string p "(return)")
+	 (rpa:emit-string p "(return)")
 	 rpa:+succeed+)
 	(t rpa:+fail+)))
 
@@ -221,7 +221,7 @@
   (cond ((rpa:parser-success? (rpa:lookahead-char? p #\^))
 	 (rpa:input-char p #\^)
 	 (rpa:input p :symbol)
-	 (error-if-not-success p
+	 (error-if-not-success p "expected ^ok or ^fail"
 	  (if (string= "fail" (scanner:token-text (rpa:accepted-token p)))
 	      (progn
                       (rpa:emit-string p "(return-from ~a rpa:+fail+)" (rpa::current-rule p))

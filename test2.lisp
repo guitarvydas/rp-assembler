@@ -1,6 +1,6 @@
 (in-package :rp-assembler)
 
-(defparameter *test-rpa-spec-third*
+(defparameter *test-rpa-spec-2a*
   "
 = rmSpaces
   [ ?SPACE | ?COMMENT | * . ]
@@ -22,7 +22,7 @@
 
 ")
 
-(defparameter *test-rpa-spec-fourth*
+(defparameter *test-rpa-spec-2b*
   "
 = rmSpaces
   [ ?SPACE | ?COMMENT | * . ]
@@ -54,33 +54,32 @@
 ")
 
 
-(defclass test-parser (parser)
+(defclass test-parser2 (parser)
   ((atom-stack :accessor atom-stack)))
 
-(defmethod initially ((self test-parser) token-list)
+(defmethod initially ((self test-parser2) token-list)
   (setf (atom-stack self) nil)
   (call-next-method))
 
 ;; test mechanisms
-(defmethod emitOpen ((self test-parser)) (emit-string self "("))
-(defmethod emitClose ((self test-parser)) (emit-string self ")"))
-(defmethod emitOpenBrace ((self test-parser)) (emit-string self "{"))
-(defmethod emitCloseBrace ((self test-parser)) (emit-string self "}"))
-(defmethod emitSpace ((self test-parser)) (emit-string self " "))
-(defmethod emitPlus ((self test-parser)) (emit-string self "+"))
-(defmethod symbolPush ((self test-parser)) (push (accepted-token self) (atom-stack self)))
-(defmethod integerPush ((self test-parser)) (push (accepted-token self) (atom-stack self)))
-(defmethod stackPop ((self test-parser)) (pop (atom-stack self)))
-(defmethod emitAtom1 ((self test-parser)) (emit-string self "~a" (token-text (second (atom-stack self)))))
-(defmethod emitAtom2 ((self test-parser)) (emit-string self "~a" (token-text (first (atom-stack self)))))
-(defmethod emitTop ((self test-parser)) (emit-string self "~a" (token-text (first (atom-stack self)))))
-(defmethod emitCurriedPlus ((self test-parser)) (emit-string self "(lambda(x)(+ x ~a))" (token-text (first (atom-stack self)))))
+(defmethod emitOpen ((self test-parser2)) (emit-string self "("))
+(defmethod emitClose ((self test-parser2)) (emit-string self ")"))
+(defmethod emitOpenBrace ((self test-parser2)) (emit-string self "{"))
+(defmethod emitCloseBrace ((self test-parser2)) (emit-string self "}"))
+(defmethod emitSpace ((self test-parser2)) (emit-string self " "))
+(defmethod emitPlus ((self test-parser2)) (emit-string self "+"))
+(defmethod symbolPush ((self test-parser2)) (push (accepted-token self) (atom-stack self)))
+(defmethod integerPush ((self test-parser2)) (push (accepted-token self) (atom-stack self)))
+(defmethod stackPop ((self test-parser2)) (pop (atom-stack self)))
+(defmethod emitAtom1 ((self test-parser2)) (emit-string self "~a" (token-text (second (atom-stack self)))))
+(defmethod emitAtom2 ((self test-parser2)) (emit-string self "~a" (token-text (first (atom-stack self)))))
+(defmethod emitTop ((self test-parser2)) (emit-string self "~a" (token-text (first (atom-stack self)))))
+(defmethod emitCurriedPlus ((self test-parser2)) (emit-string self "(lambda(x)(+ x ~a))" (token-text (first (atom-stack self)))))
 ;; end mechanisms
   
 (defun test2 ()
-  ;; cascade DSLs
-  (let ((p (make-instance 'test-parser)))
-    (let ((r (transpile p *test-rpa-spec-third* *test-dsl-code2* 'rp-assembler::calculator)))
+  (let ((p (make-instance 'test-parser2)))
+    (let ((r (transpile p *test-rpa-spec-2a* *test-dsl-code2* 'rp-assembler::calculator)))
       (format *standard-output* "~&      result=~a~%" r)
       (format *standard-output* "~&       final=~a~%" 
-	      (transpile p *test-rpa-spec-fourth* r 'rp-assembler::calculator)))))
+	      (transpile p *test-rpa-spec-2b* r 'rp-assembler::calculator)))))
