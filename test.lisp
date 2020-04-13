@@ -66,9 +66,58 @@
   [ ?SPACE | ?COMMENT | * . ]
 ")
 
+(defparameter *test-rpa-spec-third*
+  "
+= rmSpaces
+  [ ?SPACE | ?COMMENT | * . ]
+
+= sym
+  SYMBOL symbolPush
+
+= calculator
+  ~rmSpaces
+  @sym '+' @sym
+  emitSymbol1
+  emitPlus
+  emitSymbol2
+  symbolPop
+  symbolPop
+
+")
+
+(defparameter *test-rpa-spec-fourth*
+  "
+= rmSpaces
+  [ ?SPACE | ?COMMENT | * . ]
+
+= sym
+  SYMBOL symbolPush
+
+= calculator
+  ~rmSpaces
+  @sym
+  '+'
+  @sym
+  emitOpen
+  emitPlus
+  emitSpace
+  emitSymbol1
+  emitSpace
+  emitSymbol2
+  emitClose
+  symbolPop
+  symbolPop
+
+")
+
 (defparameter *test-dsl-code*
   "
 x + y
+")
+
+(defparameter *test-dsl-code2*
+  "
+a + b
 ")
 
 
@@ -87,6 +136,8 @@ x + y
 ;; test mechanisms
 (defmethod emitOpen ((self test-parser)) (emit-string self "("))
 (defmethod emitClose ((self test-parser)) (emit-string self ")"))
+(defmethod emitOpenBrace ((self test-parser)) (emit-string self "{"))
+(defmethod emitCloseBrace ((self test-parser)) (emit-string self "}"))
 (defmethod emitSpace ((self test-parser)) (emit-string self " "))
 (defmethod emitPlus ((self test-parser)) (emit-string self "+"))
 (defmethod symbolPush ((self test-parser)) (push (accepted-token self) (symbol-stack self)))
@@ -100,10 +151,18 @@ x + y
     (let ((r (transpile p *test-rpa-spec* *test-dsl-code* 'rp-assembler::calculator)))
       (format *standard-output* "~&      result=~a~%" r))))
 
-(defun test ()
+(defun test1 ()
   ;; cascade DSLs
   (let ((p (make-instance 'test-parser)))
     (let ((r (transpile p *test-rpa-spec-first* *test-dsl-code* 'rp-assembler::calculator)))
       (format *standard-output* "~&      result=~a~%" r)
       (format *standard-output* "~&       final=~a~%" 
 	      (transpile p *test-rpa-spec-second* r 'rp-assembler::calculator)))))
+
+(defun test ()
+  ;; cascade DSLs
+  (let ((p (make-instance 'test-parser)))
+    (let ((r (transpile p *test-rpa-spec-third* *test-dsl-code2* 'rp-assembler::calculator)))
+      (format *standard-output* "~&      result=~a~%" r)
+      (format *standard-output* "~&       final=~a~%" 
+	      (transpile p *test-rpa-spec-fourth* r 'rp-assembler::calculator)))))

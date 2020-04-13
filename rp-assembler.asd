@@ -24,5 +24,7 @@
                     (funcall next))
   :components ((:module "source"
                         :pathname "./"
-                        :components ((:file "test")))))
+                        :components ((:file "test")
+				     (:file "test2")))))
+
 
