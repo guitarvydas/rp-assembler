@@ -38,12 +38,12 @@
   emitOpen
   @num
   emitCurriedPlus
+  stackPop
   '+'
   emitSpace
   @num
   emitTop
   emitClose
-  stackPop
   stackPop
 
 ")
@@ -74,7 +74,7 @@
 (defmethod emitAtom1 ((self test-parser)) (emit-string self "~a" (token-text (second (atom-stack self)))))
 (defmethod emitAtom2 ((self test-parser)) (emit-string self "~a" (token-text (first (atom-stack self)))))
 (defmethod emitTop ((self test-parser)) (emit-string self "~a" (token-text (first (atom-stack self)))))
-(defmethod emitCurriedPlus ((self test-parser)) (emit-string self "(lambda(x)(+ ~a x))" (token-text (first (atom-stack self)))))
+(defmethod emitCurriedPlus ((self test-parser)) (emit-string self "(lambda(x)(+ x ~a))" (token-text (first (atom-stack self)))))
 ;; end mechanisms
   
 (defun test2 ()
