@@ -74,14 +74,14 @@
 
 
 (defmethod call-rule ((self parser) func)
-  (funcall func))
+  (funcall func self))
 
 (defmethod call-predicate ((self parser) func)
-  (let ((%result (funcall func)))
+  (let ((%result (funcall func self)))
     %result))
 
 (defmethod call-external ((self parser) func)
-  (funcall func))
+  (funcall func self))
 
 (defmethod accept-and-return-token ((p parser))
   (accept p)
@@ -91,15 +91,12 @@
   (let ((%new-list nil))
     (loop (when (eq :EOF (token-kind (accepted-token p)))
 	    (return))
-(format *standard-output* "~&filter ~s ~a ~s ~a~%"
 	(token-kind (accepted-token p)) (token-text (accepted-token p))
-	(token-kind (next-token p)) (token-text (next-token p)))
+	(token-kind (next-token p)) (token-text (next-token p))
        (let ((%a (accepted-token p))
 	     (%n (next-token p)))
 	 (funcall rule-name p)
 	 (if (and (eq %a (accepted-token p)) (eq %n (next-token p)))
 	     (accept p)
 	     (push (accepted-token p) %new-list))))
-(format *standard-output* "~&finishing filter 1~%")
-    (initially p (reverse %new-list))
-(format *standard-output* "~&finishing filter 2~%")))
+    (initially p (reverse %new-list))))

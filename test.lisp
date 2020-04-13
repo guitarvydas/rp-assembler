@@ -54,6 +54,11 @@
 x + y
 ")
 
+(defparameter *test-dsl-code2*
+  "
+x.a + y.b
+")
+
 (defclass test-parser (parser)
   ((symbol-stack :accessor symbol-stack)))
 
@@ -67,9 +72,13 @@ x + y
 (defmethod emitPlus ((self test-parser)) (emit-string self "+"))
 (defmethod symbolPush ((self test-parser)) (push (accepted-token self) (symbol-stack self)))
 (defmethod symbolPop ((self test-parser)) (pop (symbol-stack self)))
-(defmethod emitSymbol1 ((self test-parser)) (emit-string self "~a" (token-text (second (symbol-stack self)))))
-(defmethod emitSymbol2 ((self test-parser)) (emit-string self "~a" (token-text (first (symbol-stack self)))))
+(defmethod emitSymbol1 ((self test-parser)) (emit-string self " ~a" (token-text (second (symbol-stack self)))))
+(defmethod emitSymbol2 ((self test-parser)) (emit-string self " ~a" (token-text (first (symbol-stack self)))))
 ;; end mechanisms
   
 (defun test ()
-  (transpile *test-rpa-spec* *test-dsl-code* 'rp-assembler::calculator))
+  (let ((p (make-instance 'test-parser)))
+    (format *standard-output* "~&result=~a~%" 
+	    (transpile p *test-rpa-spec* *test-dsl-code* 'rp-assembler::calculator))
+    (format *standard-output* "~& final=~a~%" 
+	    (transpile p *test-rpa-spec* *test-dsl-code* 'rp-assembler::calculator))))

@@ -6,7 +6,7 @@
 	(t (accept p))))
 	 
 (defmethod <rp> ((p parser))
-  (rp-filter-stream p 'skip-spaces-and-comments)
+  (rp-filter-stream p #'skip-spaces-and-comments)
   (@:loop
     (if (rpa:parser-success? (rpa:lookahead-char? p #\=))
 	(<parse-rule> p)
@@ -19,7 +19,7 @@
 (defmethod <filter-stream> ((p parser))
   (rpa:input-char p #\~)
   (rpa:input p :symbol)
-  (rpa:emit-string p "(rp-filter-stream p ~a)" (accepted-token p)))
+  (rpa:emit-string p "(rp-filter-stream p #'~a)" (token-text (accepted-token p))))
 
 (defmethod <parse-token-expr> ((p parser))
   (cond ((rpa:parser-success? (rpa:lookahead-char? p #\'))
